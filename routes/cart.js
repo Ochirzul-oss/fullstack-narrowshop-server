@@ -37,6 +37,7 @@ router.post('/add', async (req, res) => {
             productId: req.body.productId,
             userId: req.body.userId,
             countInStock:req.body.countInStock,
+            weight:req.body.weight,
         });
     
     
