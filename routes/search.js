@@ -21,6 +21,7 @@ router.get("/", async (req, res) => {
         $or: [
           { name: { $regex: query, $options: "i" } },
           { brand: { $regex: query, $options: "i" } },
+          { ISBN: { $regex: query, $options: "i" } },
           { catName: { $regex: query, $options: "i" } },
         ],
       })
