@@ -436,6 +436,7 @@ router.post(`/recentlyViewd`, async (req, res) => {
     product = new RecentlyViewd({
       prodId: req.body.id,
       name: req.body.name,
+      ISBN: req.body.ISBN,
       description: req.body.description,
       images: req.body.images,
       brand: req.body.brand,
@@ -485,6 +486,7 @@ router.post(`/create`, async (req, res) => {
 
   product = new Product({
     name: req.body.name,
+    ISBN: req.body.ISBN,
     description: req.body.description,
     images: images_Array,
     brand: req.body.brand,
@@ -605,6 +607,7 @@ router.put("/:id", async (req, res) => {
     req.params.id,
     {
       name: req.body.name,
+      ISBN: req.body.ISBN,
       subCat: req.body.subCat,
       description: req.body.description,
       images: req.body.images,
