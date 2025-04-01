@@ -27,6 +27,10 @@ const recentlyViewdSchema = mongoose.Schema({
         type: String,
         default: ''
     },
+     weight: {
+        type: String,
+        default: ''
+    },
     price: {
         type: Number,
         default: 0
