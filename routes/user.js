@@ -107,6 +107,8 @@ router.post(`/signup`, async (req, res) => {
 
       user = new User({
         name,
+        lastname,
+        regnumber,
         email,
         phone,
         password: hashPassword,
@@ -191,6 +193,8 @@ router.put(`/verifyAccount/emailVerify/:id`, async (req, res) => {
         req.params.id,
         {
           name: existingUser.name,
+          lastname: existingUser.lastname,
+          regnumber: existingUser.regnumber,
           email: email,
           phone: existingUser.phone,
           password: existingUser.password,
@@ -416,6 +420,8 @@ router.post(`/authWithGoogle`, async (req, res) => {
     if (!existingUser) {
       const result = await User.create({
         name: name,
+        lastname: lastname,
+        regnumber: regnumber,
         phone: phone,
         email: email,
         password: password,
