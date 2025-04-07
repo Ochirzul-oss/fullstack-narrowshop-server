@@ -24,6 +24,9 @@ const userSchema = mongoose.Schema({
     password:{
         type:String,
     },
+    workk:{
+        type:String,
+    },
     images:[
         {
             type:String,
