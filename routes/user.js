@@ -479,9 +479,6 @@ router.put("/:id", async (req, res) => {
     req.params.id,
     {
       name: name,
-      lastname: lastname,
-      regnumber: regnumber,
-      workk:workk,
       phone: phone,
       email: email,
       password: newPassword,
