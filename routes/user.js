@@ -320,7 +320,7 @@ router.post(`/signin`, async (req, res) => {
 });
 
 router.put(`/changePassword/:id`, async (req, res) => {
-  const { name, phone, email, lastname, workk, regnumber, password, newPass, images } = req.body;
+  const { name, phone, email, password, newPass, images } = req.body;
 
   // console.log(req.body)
 
