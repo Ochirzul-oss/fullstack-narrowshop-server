@@ -111,6 +111,7 @@ router.post(`/signup`, async (req, res) => {
         regnumber,
         email,
         phone,
+        workk,
         password: hashPassword,
         isAdmin,
         otp: verifyCode,
@@ -199,6 +200,7 @@ router.put(`/verifyAccount/emailVerify/:id`, async (req, res) => {
           phone: existingUser.phone,
           password: existingUser.password,
           images: existingUser.images,
+          workk: existringUser.workk,
           isAdmin: existingUser.isAdmin,
           isVerified: existingUser.isVerified,
           otp: otp,
@@ -344,10 +346,13 @@ router.put(`/changePassword/:id`, async (req, res) => {
       req.params.id,
       {
         name: name,
+        lastname: lastname,
+        regnumber: regnumber,
         phone: phone,
         email: email,
         password: newPassword,
         images: images,
+        workk: workk,
       },
       { new: true }
     );
@@ -426,6 +431,7 @@ router.post(`/authWithGoogle`, async (req, res) => {
         email: email,
         password: password,
         images: images,
+        workk: workk,
         isAdmin: isAdmin,
         isVerified: true,
       });
@@ -473,6 +479,9 @@ router.put("/:id", async (req, res) => {
     req.params.id,
     {
       name: name,
+      lastname: lastname,
+      regnumber: regnumber,
+      workk:workk,
       phone: phone,
       email: email,
       password: newPassword,
