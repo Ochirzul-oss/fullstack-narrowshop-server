@@ -8,6 +8,7 @@ const productSchema = mongoose.Schema({
     ISBN: {
         type: String,
         required: true,
+        unique: true,
     },
     description: {
         type: String,
