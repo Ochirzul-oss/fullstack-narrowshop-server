@@ -107,10 +107,8 @@ router.post(`/signup`, async (req, res) => {
 
       user = new User({
         name,
-        regnumber,
         email,
         phone,
-        workk,
         password: hashPassword,
         isAdmin,
         otp: verifyCode,
@@ -193,12 +191,10 @@ router.put(`/verifyAccount/emailVerify/:id`, async (req, res) => {
         req.params.id,
         {
           name: existingUser.name,
-          regnumber: existingUser.regnumber,
           email: email,
           phone: existingUser.phone,
           password: existingUser.password,
           images: existingUser.images,
-          workk: existringUser.workk,
           isAdmin: existingUser.isAdmin,
           isVerified: existingUser.isVerified,
           otp: otp,
@@ -344,12 +340,10 @@ router.put(`/changePassword/:id`, async (req, res) => {
       req.params.id,
       {
         name: name,
-        regnumber: regnumber,
         phone: phone,
         email: email,
         password: newPassword,
         images: images,
-        workk: workk,
       },
       { new: true }
     );
@@ -422,12 +416,10 @@ router.post(`/authWithGoogle`, async (req, res) => {
     if (!existingUser) {
       const result = await User.create({
         name: name,
-        regnumber: regnumber,
         phone: phone,
         email: email,
         password: password,
         images: images,
-        workk: workk,
         isAdmin: isAdmin,
         isVerified: true,
       });
@@ -475,8 +467,6 @@ router.put("/:id", async (req, res) => {
     req.params.id,
     {
       name: name,
-      workk: workk,
-      regnumber: regnumber,
       phone: phone,
       email: email,
       password: newPassword,
