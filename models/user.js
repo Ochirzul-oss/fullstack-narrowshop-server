@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const userSchema = mongoose.Schema({
-    regnumber:{
-        type: String,
-        required: true,
-    },
     name:{
         type: String,
         required: true,
@@ -18,9 +14,6 @@ const userSchema = mongoose.Schema({
         required:true,
     },
     password:{
-        type:String,
-    },
-    workk:{
         type:String,
     },
     images:[
