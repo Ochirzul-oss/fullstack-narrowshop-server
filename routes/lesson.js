@@ -1,6 +1,6 @@
 const { Category } = require("../models/category.js");
 const { Product } = require("../models/products.js");
-const {Lesson} = require("../models/lesson.js");
+const { Lesson } = require("../models/lesson.js");
 const { MyList } = require("../models/myList");
 const { Cart } = require("../models/cart");
 const { RecentlyViewd } = require("../models/recentlyViewd.js");
