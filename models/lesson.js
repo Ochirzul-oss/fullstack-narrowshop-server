@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const productSchema = mongoose.Schema({
+const lessonSchema = mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -72,12 +72,12 @@ const productSchema = mongoose.Schema({
 })
 
 
-productSchema.virtual('id').get(function () {
+lessonSchema.virtual('id').get(function () {
     return this._id.toHexString();
 });
 
-productSchema.set('toJSON', {
+lessonSchema.set('toJSON', {
     virtuals: true,
 });
 
-exports.Product = mongoose.model('Lesson', productSchema);
+exports.Lesson = mongoose.model('Lesson', lessonSchema);
