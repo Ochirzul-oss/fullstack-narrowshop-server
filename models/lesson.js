@@ -44,15 +44,12 @@ const lessonSchema = mongoose.Schema({
         ref: 'Category',
         required: true
     },
-    weight: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Weight',
-        required: true
-    },
-    countInStock: {
-        type: Number,
-        required: true,
-    },
+    products: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product', 
+        }
+    ],
     productRam: [
         {
             type: String,
