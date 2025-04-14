@@ -1,8 +1,8 @@
 const { Category } = require("../models/category.js");
 const { Product } = require("../models/products.js");
-const { Lesson } = require("../models/lesson.js");
 const { MyList } = require("../models/myList");
 const { Cart } = require("../models/cart");
+const { Lesson } = require("../models/lessons.js");
 const { RecentlyViewd } = require("../models/recentlyViewd.js");
 const { ImageUpload } = require("../models/imageUpload.js");
 const express = require("express");
@@ -68,9 +68,9 @@ router.post(`/upload`, upload.array("images"), async (req, res) => {
 
 router.get(`/`, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const perPage = parseInt(req.query.perPage) || 10; // Default to 10 if perPage is not provided
-  const totalLessons = await Lesson.countDocuments(); // Count documents in the Lesson collection
-  const totalPages = Math.ceil(totalLessons / perPage);
+  const perPage = parseInt(req.query.perPage);
+  const totalPosts = await Lesson.countDocuments();
+  const totalPages = Math.ceil(totalPosts / perPage);
 
   if (page > totalPages) {
     return res.status(404).json({ message: "Page not found" });
@@ -79,18 +79,32 @@ router.get(`/`, async (req, res) => {
   let lessonList = [];
 
   if (req.query.page !== undefined && req.query.perPage !== undefined) {
-    // If you have a specific filtering logic for lessons, adjust accordingly
-    lessonList = await Lesson.find()
-      .populate("category") // Adjust if your Lesson model has a different reference
-      .skip((page - 1) * perPage)
-      .limit(perPage)
-      .exec();
-  } else {
-    lessonList = await Lesson.find(); // Get all lessons if pagination is not specified
-  }
+    if (req.query.location !== undefined) {
+      const lessonListArr = await Lesson.find()
+        .populate("category")
+        .skip((page - 1) * perPage)
+        .limit(perPage)
+        .exec();
 
+      for (let i = 0; i < lessonListArr.length; i++) {
+        for (let j = 0; j < lessonListArr[i].location.length; j++) {
+          if (lessonListArr[i].location[j].value === req.query.location) {
+            lessonList.push(lessonListArr[i]);
+          }
+        }
+      }
+    } else {
+      lessonList = await Lesson.find()
+        .populate("category")
+        .skip((page - 1) * perPage)
+        .limit(perPage)
+        .exec();
+    }
+  } else {
+    lessonList = await Lesson.find();
+  }
   return res.status(200).json({
-    lessons: lessonList, // Return lessons instead of products
+    lessons: lessonList,
     totalPages: totalPages,
     page: page,
   });
@@ -100,54 +114,50 @@ router.get(`/catName`, async (req, res) => {
   let lessonList = [];
 
   const page = parseInt(req.query.page) || 1;
-  const perPage = parseInt(req.query.perPage) || 10; // Default to 10 if perPage is not provided
-  const totalLessons = await Lesson.countDocuments(); // Count documents in the Lesson collection
-  const totalPages = Math.ceil(totalLessons / perPage);
+  const perPage = parseInt(req.query.perPage);
+  const totalPosts = await Lesson.countDocuments();
+  const totalPages = Math.ceil(totalPosts / perPage);
 
   if (page > totalPages) {
     return res.status(404).json({ message: "Page not found" });
   }
 
   if (req.query.page !== undefined && req.query.perPage !== undefined) {
-    const lessonListArr = await Lesson.find({ catName: req.query.catName }) // Filter by catName
-      .populate("category") // Adjust if your Lesson model has a different reference
+    const lessonListArr = await Lesson.find({ catName: req.query.catName })
+      .populate("category")
       .skip((page - 1) * perPage)
       .limit(perPage)
       .exec();
 
     return res.status(200).json({
-      lessons: lessonListArr, // Return lessons instead of products
+      lessons: lessonListArr,
       totalPages: totalPages,
       page: page,
     });
   } else {
-    const lessonListArr = await Lesson.find({ catName: req.query.catName }) // Filter by catName
-      .populate("category") // Adjust if your Lesson model has a different reference
+    const lessonListArr = await Lesson.find({ catName: req.query.catName })
+      .populate("category")
       .skip((page - 1) * perPage)
       .limit(perPage)
       .exec();
 
-    // If your Lesson model has a location field, adjust this logic accordingly
     for (let i = 0; i < lessonListArr.length; i++) {
-      // Assuming location is an array in the Lesson model
-      if (lessonListArr[i].location) {
-        for (let j = 0; j < lessonListArr[i].location.length; j++) {
-          if (lessonListArr[i].location[j].value === req.query.location) {
-            lessonList.push(lessonListArr[i]);
-          }
+      for (let j = 0; j < lessonListArr[i].location.length; j++) {
+        if (lessonListArr[i].location[j].value === req.query.location) {
+          lessonList.push(lessonListArr[i]);
         }
       }
     }
 
     if (req.query.location !== "All") {
       return res.status(200).json({
-        lessons: lessonList, // Return filtered lessons
+        lessons: lessonList,
         totalPages: totalPages,
         page: page,
       });
     } else {
       return res.status(200).json({
-        lessons: lessonListArr, // Return all lessons if location is "All"
+        lessons: lessonListArr,
         totalPages: totalPages,
         page: page,
       });
@@ -156,100 +166,203 @@ router.get(`/catName`, async (req, res) => {
 });
 
 router.get(`/catId`, async (req, res) => {
+  let lessonList = [];
+  let lessonListArr = [];
+
   const page = parseInt(req.query.page) || 1;
-  const perPage = parseInt(req.query.perPage) || 10; // Default to 10 if perPage is not provided
-  const totalLessons = await Lesson.countDocuments(); // Count documents in the Lesson collection
-  const totalPages = Math.ceil(totalLessons / perPage);
+  const perPage = parseInt(req.query.perPage);
+  const totalPosts = await Lesson.countDocuments();
+  const totalPages = Math.ceil(totalPosts / perPage);
 
   if (page > totalPages) {
     return res.status(404).json({ message: "Page not found" });
   }
 
-  // Fetch lessons based on catId
-  const lessonListArr = await Lesson.find({ catId: req.query.catId }) // Filter by catId
-    .populate("category") // Adjust if your Lesson model has a different reference
-    .skip((page - 1) * perPage)
-    .limit(perPage)
-    .exec();
+  if (req.query.page !== undefined && req.query.perPage !== undefined) {
+    const lessonListArr = await Lesson.find({ catId: req.query.catId })
+      .populate("category")
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .exec();
 
-  return res.status(200).json({
-    lessons: lessonListArr, // Return lessons instead of products
-    totalPages: totalPages,
-    page: page,
-  });
+    return res.status(200).json({
+      lessons: lessonListArr,
+      totalPages: totalPages,
+      page: page,
+    });
+  } else {
+    lessonListArr = await Lesson.find({ catId: req.query.catId });
+
+    for (let i = 0; i < lessonListArr.length; i++) {
+      for (let j = 0; j < lessonListArr[i].location.length; j++) {
+        if (lessonListArr[i].location[j].value === req.query.location) {
+          lessonList.push(lessonListArr[i]);
+        }
+      }
+    }
+
+    if (req.query.location !== "All" && req.query.location!==undefined) {
+      return res.status(200).json({
+        lessons: lessonList,
+        totalPages: totalPages,
+        page: page,
+      });
+    } else {
+      return res.status(200).json({
+        lessons: lessonListArr,
+        totalPages: totalPages,
+        page: page,
+      });
+    }
+  }
 });
 
 router.get(`/subCatId`, async (req, res) => {
+  let lessonList = [];
+
   const page = parseInt(req.query.page) || 1;
-  const perPage = parseInt(req.query.perPage) || 10; // Default to 10 if perPage is not provided
-  const totalLessons = await Lesson.countDocuments(); // Count documents in the Lesson collection
-  const totalPages = Math.ceil(totalLessons / perPage);
+  const perPage = parseInt(req.query.perPage);
+  const totalPosts = await Lesson.countDocuments();
+  const totalPages = Math.ceil(totalPosts / perPage);
 
   if (page > totalPages) {
     return res.status(404).json({ message: "Page not found" });
   }
 
-  // Fetch lessons based on subCatId
-  const lessonListArr = await Lesson.find({ subCatId: req.query.subCatId }) // Filter by subCatId
-    .populate("category") // Adjust if your Lesson model has a different reference
-    .skip((page - 1) * perPage)
-    .limit(perPage)
-    .exec();
+  if (req.query.page !== undefined && req.query.perPage !== undefined) {
+    const lessonListArr = await Lesson.find({ subCatId: req.query.subCatId })
+      .populate("category")
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .exec();
 
-  return res.status(200).json({
-    lessons: lessonListArr, // Return lessons instead of products
-    totalPages: totalPages,
-    page: page,
-  });
+    return res.status(200).json({
+      lessons: lessonListArr,
+      totalPages: totalPages,
+      page: page,
+    });
+  } else {
+    const lessonListArr = await Lesson.find({ subCatId: req.query.subCatId });
+
+    for (let i = 0; i < lessonListArr.length; i++) {
+      for (let j = 0; j < lessonListArr[i].location.length; j++) {
+        if (lessonListArr[i].location[j].value === req.query.location) {
+          lessonList.push(lessonListArr[i]);
+        }
+      }
+    }
+
+    if (req.query.location !== "All") {
+      return res.status(200).json({
+        lessons: lessonList,
+        totalPages: totalPages,
+        page: page,
+      });
+    } else {
+      return res.status(200).json({
+        lessons: lessonListArr,
+        totalPages: totalPages,
+        page: page,
+      });
+    }
+  }
 });
 
-router.get(`/filterByPrice`, async (req, res) => {
+router.get(`/fiterByPrice`, async (req, res) => {
   let lessonList = [];
 
-  // Check if catId is provided
-  if (req.query.catId && req.query.catId !== "") {
-    lessonList = await Lesson.find({ catId: req.query.catId }).populate("category");
-  } 
-  // Check if subCatId is provided
-  else if (req.query.subCatId && req.query.subCatId !== "") {
-    lessonList = await Lesson.find({ subCatId: req.query.subCatId }).populate("category");
+  if (req.query.catId !== "" && req.query.catId !== undefined) {
+    const lessonListArr = await Lesson.find({
+      catId: req.query.catId,
+    }).populate("category");
+
+    if (req.query.location !== "All") {
+      for (let i = 0; i < lessonListArr.length; i++) {
+        for (let j = 0; j < lessonListArr[i].location.length; j++) {
+          if (lessonListArr[i].location[j].value === req.query.location) {
+            lessonList.push(lessonListArr[i]);
+          }
+        }
+      }
+    } else {
+      lessonList = lessonListArr;
+    }
+  } else if (req.query.subCatId !== "" && req.query.subCatId !== undefined) {
+    const lessonListArr = await Lesson.find({
+      subCatId: req.query.subCatId,
+    }).populate("category");
+
+    if (req.query.location !== "All") {
+      for (let i = 0; i < lessonListArr.length; i++) {
+        for (let j = 0; j < lessonListArr[i].location.length; j++) {
+          if (lessonListArr[i].location[j].value === req.query.location) {
+            lessonList.push(lessonListArr[i]);
+          }
+        }
+      }
+    } else {
+      lessonList = lessonListArr;
+    }
   }
 
-  // Filter lessons by price
   const filteredLessons = lessonList.filter((lesson) => {
-    if (req.query.minPrice && lesson.price < parseInt(req.query.minPrice)) {
+    if (req.query.minPrice && lesson.price < parseInt(+req.query.minPrice)) {
       return false;
     }
-    if (req.query.maxPrice && lesson.price > parseInt(req.query.maxPrice)) {
+    if (req.query.maxPrice && lesson.price > parseInt(+req.query.maxPrice)) {
       return false;
     }
     return true;
   });
 
   return res.status(200).json({
-    lessons: filteredLessons, // Return lessons instead of products
-    totalPages: 0, // Adjust if you implement pagination
-    page: 0, // Adjust if you implement pagination
+    lessons: filteredLessons,
+    totalPages: 0,
+    page: 0,
   });
 });
 
 router.get(`/rating`, async (req, res) => {
   let lessonList = [];
 
-  if (req.query.catId && req.query.catId !== "") {
-    lessonList = await Lesson.find({
+  if (req.query.catId !== "" && req.query.catId !== undefined) {
+    const lessonListArr = await Lesson.find({
       catId: req.query.catId,
       rating: req.query.rating,
     }).populate("category");
-  } else if (req.query.subCatId && req.query.subCatId !== "") {
-    lessonList = await Lesson.find({
+
+    if (req.query.location !== "All") {
+      for (let i = 0; i < lessonListArr.length; i++) {
+        for (let j = 0; j < lessonListArr[i].location.length; j++) {
+          if (lessonListArr[i].location[j].value === req.query.location) {
+            lessonList.push(lessonListArr[i]);
+          }
+        }
+      }
+    } else {
+      lessonList = lessonListArr;
+    }
+  } else if (req.query.subCatId !== "" && req.query.subCatId !== undefined) {
+    const lessonListArr = await Lesson.find({
       subCatId: req.query.subCatId,
       rating: req.query.rating,
     }).populate("category");
+
+    if (req.query.location !== "All") {
+      for (let i = 0; i < lessonListArr.length; i++) {
+        for (let j = 0; j < lessonListArr[i].location.length; j++) {
+          if (lessonListArr[i].location[j].value === req.query.location) {
+            lessonList.push(lessonListArr[i]);
+          }
+        }
+      }
+    } else {
+      lessonList = lessonListArr;
+    }
   }
 
   return res.status(200).json({
-    lessons: lessonList, // Return lessons instead of products
+    lessons: lessonList,
     totalPages: 0,
     page: 0,
   });
@@ -262,270 +375,241 @@ router.get(`/get/count`, async (req, res) => {
     res.status(500).json({ success: false });
   } else {
     res.send({
-      lessonsCount: lessonsCount, // Return lessons count
+      lessonsCount: lessonsCount,
     });
   }
 });
 
 router.get(`/featured`, async (req, res) => {
-  let lessonList = await Lesson.find({ isFeatured: true }).populate("category");
+  let lessonList = [];
+  if (req.query.location !== undefined && req.query.location !== null) {
+    const lessonListArr = await Lesson.find({ isFeatured: true }).populate(
+      "category"
+    );
+
+    for (let i = 0; i < lessonListArr.length; i++) {
+      for (let j = 0; j < lessonListArr[i].location.length; j++) {
+        if (lessonListArr[i].location[j].value === req.query.location) {
+          lessonList.push(lessonListArr[i]);
+        }
+      }
+    }
+  } else {
+    lessonList = await Lesson.find({ isFeatured: true }).populate("category");
+  }
 
   if (!lessonList) {
     res.status(500).json({ success: false });
   }
 
-  return res.status(200).json(lessonList); // Return featured lessons
+  return res.status(200).json(lessonList);
 });
 
-router.get(`/recentlyViewed`, async (req, res) => {
-  let lessonList = await RecentlyViewed.find(req.query).populate("category"); // Adjust if you have a different model
+router.get(`/recentlyViewd`, async (req, res) => {
+  let lessonList = [];
+  lessonList = await RecentlyViewd.find(req.query).populate("category");
 
   if (!lessonList) {
     res.status(500).json({ success: false });
   }
 
-  return res.status(200).json(lessonList); // Return recently viewed lessons
+  return res.status(200).json(lessonList);
 });
 
 router.post(`/recentlyViewd`, async (req, res) => {
-  let findLesson = await RecentlyViewed.find({ lessonId: req.body.id });
+  let findLesson = await RecentlyViewd.find({ prodId: req.body.id });
 
-  var product;
+  var lesson;
 
   if (findLesson.length === 0) {
-    const lesson = new RecentlyViewed({
+    lesson = new RecentlyViewd({
       prodId: req.body.id,
       name: req.body.name,
       description: req.body.description,
       images: req.body.images,
-      brand: req.body.brand,
       price: req.body.price,
-      oldPrice: req.body.oldPrice,
       subCatId: req.body.subCatId,
       catName: req.body.catName,
       subCat: req.body.subCat,
       category: req.body.category,
-      countInStock: req.body.countInStock,
-      weight: req.body.weight,
-      rating: req.body.rating,
-      isFeatured: req.body.isFeatured,
-      discount: req.body.discount,
+      category: req.body.category,
       productRam: req.body.productRam,
       size: req.body.size,
-      productWeight: req.body.productWeight,
     });
-    const savedLesson = await lesson.save();
 
+    lesson = await lesson.save();
 
-    if (!savedLesson) {
-      return res.status(500).json({
+    if (!lesson) {
+      res.status(500).json({
+        error: err,
         success: false,
-        message: "Failed to save recently viewed lesson.",
       });
     }
-    return res.status(201).json(savedLesson);
-  } else {
-    // Optionally, you can return a message if the lesson is already in the recently viewed list
-    return res.status(200).json({ message: "Lesson already viewed." });
+
+    res.status(201).json(lesson);
   }
 });
 
 router.post(`/create`, async (req, res) => {
-  // Check if the category exists
   const category = await Category.findById(req.body.category);
   if (!category) {
-    return res.status(404).send("Invalid Category!");
+    return res.status(404).send("invalid Category!");
   }
 
-  // Assuming you have a similar image upload logic for lessons
   const images_Array = [];
-  const uploadedImages = await ImageUpload.find(); // Adjust if necessary
+  const uploadedImages = await ImageUpload.find();
 
-  // Collect images from uploaded images
-  uploadedImages?.forEach((item) => {
-    item.images?.forEach((image) => {
+  const images_Arr = uploadedImages?.map((item) => {
+    item.images?.map((image) => {
       images_Array.push(image);
+      console.log(image);
     });
   });
 
-  // Create a new lesson
-  const lesson = new Lesson({
+  lesson = new Lesson({
     name: req.body.name,
     description: req.body.description,
-    images: images_Array, // Assuming lessons have an images field
-    brand: req.body.brand, // Adjust if your Lesson model does not have a brand field
-    price: req.body.price, // Adjust if applicable
-    oldPrice: req.body.oldPrice, // Adjust if applicable
-    catId: req.body.catId, // Adjust if applicable
-    catName: req.body.catName, // Adjust if applicable
-    subCat: req.body.subCat, // Adjust if applicable
-    subCatId: req.body.subCatId, // Adjust if applicable
-    subCatName: req.body.subCatName, // Adjust if applicable
-    category: req.body.category, // This should match the category field in your Lesson model
-    countInStock: req.body.countInStock, // Adjust if applicable
-    weight: req.body.weight, // Adjust if applicable
-    rating: req.body.rating, // Adjust if applicable
-    isFeatured: req.body.isFeatured, // Adjust if applicable
-    discount: req.body.discount, // Adjust if applicable
-    productRam: req.body.productRam, // Adjust if applicable
-    size: req.body.size, // Adjust if applicable
-    productWeight: req.body.productWeight, // Adjust if applicable
-    // Remove location if it doesn't exist in your Lesson model
+    images: images_Array,
+    price: req.body.price,
+    catId: req.body.catId,
+    catName: req.body.catName,
+    subCat: req.body.subCat,
+    subCatId: req.body.subCatId,
+    subCatName: req.body.subCatName,
+    category: req.body.category,
+    productRam: req.body.productRam,
+    size: req.body.size,
+    location: req.body.location !== "" ? req.body.location : "All",
   });
 
-  // Save the lesson
-  const savedLesson = await lesson.save();
+  lesson = await lesson.save();
 
-  if (!savedLesson) {
-    return res.status(500).json({
+  if (!lesson) {
+    res.status(500).json({
+      error: err,
       success: false,
-      message: "Failed to create lesson.",
     });
   }
 
-  return res.status(201).json(savedLesson);
+  imagesArr = [];
+
+  res.status(201).json(lesson);
 });
 
 router.get("/:id", async (req, res) => {
-  const lessonId = req.params.id; // Use a more descriptive variable name
+  lessonEditId = req.params.id;
 
-  try {
-    const lesson = await Lesson.findById(lessonId).populate("category"); // Adjust if your Lesson model has a different reference
+  const lesson = await Lesson.findById(req.params.id).populate("category");
 
-    if (!lesson) {
-      return res.status(404).json({ message: "The lesson with the given ID was not found." });
-    }
-
-    return res.status(200).send(lesson);
-  } catch (err) {
-    return res.status(500).json({ message: "An error occurred while retrieving the lesson.", error: err });
+  if (!lesson) {
+    res
+      .status(500)
+      .json({ message: "The lesson with the given ID was not found." });
   }
+  return res.status(200).send(lesson);
 });
 
 router.delete("/deleteImage", async (req, res) => {
   const imgUrl = req.query.img;
 
-  if (!imgUrl) {
-    return res.status(400).json({ message: "Image URL is required." });
-  }
 
   const urlArr = imgUrl.split("/");
   const image = urlArr[urlArr.length - 1];
 
   const imageName = image.split(".")[0];
 
-  try {
-    const response = await cloudinary.uploader.destroy(imageName);
+  const response = await cloudinary.uploader.destroy(
+    imageName,
+    (error, result) => {}
+  );
 
-    if (response.result === "ok") {
-      return res.status(200).json({ message: "Image deleted successfully.", response });
-    } else {
-      return res.status(500).json({ message: "Failed to delete image.", response });
-    }
-  } catch (error) {
-    return res.status(500).json({ message: "An error occurred while deleting the image.", error });
+  if (response) {
+    res.status(200).send(response);
   }
 });
 
 router.delete("/:id", async (req, res) => {
-  try {
-    // Find the lesson by ID
-    const lesson = await Lesson.findById(req.params.id);
-    if (!lesson) {
-      return res.status(404).json({
-        message: "Lesson not found!",
-        success: false,
+  const lesson = await Lesson.findById(req.params.id);
+  const images = lesson.images;
+
+  for (img of images) {
+    const imgUrl = img;
+    const urlArr = imgUrl.split("/");
+    const image = urlArr[urlArr.length - 1];
+
+    const imageName = image.split(".")[0];
+
+    if (imageName) {
+      cloudinary.uploader.destroy(imageName, (error, result) => {
       });
     }
 
-    // Delete associated images from Cloudinary
-    const images = lesson.images;
-    for (const img of images) {
-      const imgUrl = img;
-      const urlArr = imgUrl.split("/");
-      const image = urlArr[urlArr.length - 1];
-      const imageName = image.split(".")[0];
+  }
 
-      if (imageName) {
-        await cloudinary.uploader.destroy(imageName);
-      }
-    }
+  const deletedLesson = await Lesson.findByIdAndDelete(req.params.id);
 
-    // Delete the lesson
-    const deletedLesson = await Lesson.findByIdAndDelete(req.params.id);
+  const myListItems = await MyList.find({ lessonId: req.params.id });
 
-    // Delete associated items in MyList
-    const myListItems = await MyList.find({ lessonId: req.params.id }); // Adjust if necessary
-    for (const item of myListItems) {
-      await MyList.findByIdAndDelete(item.id);
-    }
+  for (var i = 0; i < myListItems.length; i++) {
+    await MyList.findByIdAndDelete(myListItems[i].id);
+  }
 
-    // Delete associated items in Cart
-    const cartItems = await Cart.find({ lessonId: req.params.id }); // Adjust if necessary
-    for (const item of cartItems) {
-      await Cart.findByIdAndDelete(item.id);
-    }
+  const cartItems = await Cart.find({ lessonId: req.params.id });
 
-    return res.status(200).json({
-      success: true,
-      message: "Lesson deleted!",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "An error occurred while deleting the lesson.",
-      error: error.message,
+  for (var i = 0; i < cartItems.length; i++) {
+    await Cart.findByIdAndDelete(cartItems[i].id);
+  }
+
+  if (!deletedLesson) {
+    res.status(404).json({
+      message: "Lesson not found!",
+      success: false,
     });
   }
+
+  res.status(200).json({
+    success: true,
+    message: "Lesson Deleted!",
+  });
 });
 
 router.put("/:id", async (req, res) => {
-  try {
-    const lesson = await Lesson.findByIdAndUpdate(
-      req.params.id,
-      {
-        name: req.body.name,
-        description: req.body.description,
-        images: req.body.images, // Assuming lessons have an images field
-        brand: req.body.brand, // Adjust if your Lesson model does not have a brand field
-        price: req.body.price, // Adjust if applicable
-        oldPrice: req.body.oldPrice, // Adjust if applicable
-        catId: req.body.catId, // Adjust if applicable
-        subCat: req.body.subCat, // Adjust if applicable
-        subCatId: req.body.subCatId, // Adjust if applicable
-        subCatName: req.body.subCatName, // Adjust if applicable
-        catName: req.body.catName, // Adjust if applicable
-        category: req.body.category, // This should match the category field in your Lesson model
-        countInStock: req.body.countInStock, // Adjust if applicable
-        weight: req.body.weight, // Adjust if applicable
-        rating: req.body.rating, // Adjust if applicable
-        numReviews: req.body.numReviews, // Adjust if applicable
-        isFeatured: req.body.isFeatured, // Adjust if applicable
-        productRam: req.body.productRam, // Adjust if applicable
-        size: req.body.size, // Adjust if applicable
-        productWeight: req.body.productWeight, // Adjust if applicable
-        // Remove location if it doesn't exist in your Lesson model
-      },
-      { new: true } // Return the updated document
-    );
+  const lesson = await Lesson.findByIdAndUpdate(
+    req.params.id,
+    {
+      name: req.body.name,
+      subCat: req.body.subCat,
+      description: req.body.description,
+      images: req.body.images,
+      price: req.body.price,
+      catId: req.body.catId,
+      subCat: req.body.subCat,
+      subCatId: req.body.subCatId,
+      subCatName: req.body.subCatName,
+      catName: req.body.catName,
+      category: req.body.category,
+      numReviews: req.body.numReviews,
+      productRam: req.body.productRam,
+      size: req.body.size,
+      location: req.body.location,
+    },
+    { new: true }
+  );
 
-    if (!lesson) {
-      return res.status(404).json({
-        message: "The lesson cannot be updated!",
-        status: false,
-      });
-    }
-
-    return res.status(200).json({
-      message: "The lesson has been updated!",
-      status: true,
-      lesson, // Optionally return the updated lesson
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "An error occurred while updating the lesson.",
-      error: error.message,
+  if (!lesson) {
+    res.status(404).json({
+      message: "the lesson can not be updated!",
+      status: false,
     });
   }
+
+  imagesArr = [];
+
+  res.status(200).json({
+    message: "the lesson is updated!",
+    status: true,
+  });
+
 });
 
 module.exports = router;
