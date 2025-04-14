@@ -1,14 +1,9 @@
 const mongoose = require("mongoose");
 
-const productSchema = mongoose.Schema({
+const lessonSchema = mongoose.Schema({
     name: {
         type: String,
         required: true,
-    },
-    ISBN: {
-        type: String,
-        required: true,
-        unique: true,
     },
     description: {
         type: String,
@@ -20,19 +15,7 @@ const productSchema = mongoose.Schema({
             required: true
         }
     ],
-    brand: {
-        type: String,
-        default: ''
-    },
-    weight: {
-        type: String,
-        default: ''
-    },
     price: {
-        type: Number,
-        default: 0
-    },
-    oldPrice: {
         type: Number,
         default: 0
     },
@@ -61,14 +44,12 @@ const productSchema = mongoose.Schema({
         ref: 'Category',
         required: true
     },
-    countInStock: {
-        type: Number,
-        required: true,
-    },
-    rating: {
-        type: Number,
-        default: 0,
-    },
+    products: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product', 
+        }
+    ],
     productRam: [
         {
             type: String,
@@ -81,22 +62,6 @@ const productSchema = mongoose.Schema({
             default: null,
         }
     ],
-    productWeight: [
-        {
-            type: String,
-            default: null,
-        }
-    ],
-    location: [
-    {
-      value: {
-        type: String,
-      },
-      label: {
-        type: String,
-      }
-    },
-  ],
     dateCreated: {
         type: Date,
         default: Date.now,
@@ -104,12 +69,12 @@ const productSchema = mongoose.Schema({
 })
 
 
-productSchema.virtual('id').get(function () {
+lessonSchema.virtual('id').get(function () {
     return this._id.toHexString();
 });
 
-productSchema.set('toJSON', {
+lessonSchema.set('toJSON', {
     virtuals: true,
 });
 
-exports.Product = mongoose.model('Product', productSchema);
+exports.Lesson = mongoose.model('Lesson', lessonSchema);
