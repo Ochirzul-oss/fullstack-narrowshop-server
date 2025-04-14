@@ -23,9 +23,6 @@ const productWeightRoutes = require('./routes/productWeight.js');
 const productRAMSRoutes = require('./routes/productRAMS.js');
 const productSIZESRoutes = require('./routes/productSize.js');
 const productReviews = require('./routes/productReviews.js');
-
-
-const lessonSchema = require(`./routes/lesson.js`)
 const cartSchema = require('./routes/cart.js');
 const myListSchema = require('./routes/myList.js');
 const ordersSchema = require('./routes/orders.js');
@@ -36,7 +33,7 @@ const homeSideBannerSchema = require('./routes/homeSideBanner.js');
 const homeBottomBannerSchema = require('./routes/homeBottomBanner.js');
 
 
-app.use(`/api/lesson`, lessonRoutes);
+app.use(`/api/lessons`, lessonRoutes);
 app.use("/api/user",userRoutes);
 app.use("/uploads",express.static("uploads"));
 app.use(`/api/category`, categoryRoutes);
@@ -46,9 +43,6 @@ app.use(`/api/productWeight`, productWeightRoutes);
 app.use(`/api/productRAMS`, productRAMSRoutes);
 app.use(`/api/productSIZE`, productSIZESRoutes);
 app.use(`/api/productReviews`, productReviews);
-
-
-app.use(`/api/lesson`, lessonSchema);
 app.use(`/api/cart`, cartSchema);
 app.use(`/api/my-list`, myListSchema);
 app.use(`/api/orders`, ordersSchema);
