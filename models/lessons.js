@@ -27,6 +27,28 @@ const lessonSchema = mongoose.Schema({
         type:String,
         default:''
     },
+    conMinute:{
+    type: String,
+    default: 0
+    },
+    timesOfLesson:{
+        type: String,
+        default: 0
+    },
+    lessonType:{
+        type: String,
+        default: ''
+    },
+    lessonDays: [
+        {
+            type: String,
+            default: null,
+        }
+    ],
+    maxiStudents:{
+        type: String,
+        default: 0
+    },
     subCatId:{
         type:String,
         default:''
