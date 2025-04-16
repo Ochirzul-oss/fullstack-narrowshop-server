@@ -458,22 +458,30 @@ router.post(`/recentlyViewd`, async (req, res) => {
 });
 
 router.post(`/create`, async (req, res) => {
+  // Check if a product with the same ISBN already exists
+  const existingProduct = await Product.findOne({ ISBN: req.body.ISBN });
+  if (existingProduct) {
+    return res.status(400).json({ message: 'A product with this ISBN already exists.' });
+  }
+
+  // Check if the category exists
   const category = await Category.findById(req.body.category);
   if (!category) {
-    return res.status(404).send("invalid Category!");
+    return res.status(404).send("Invalid Category!");
   }
 
   const images_Array = [];
   const uploadedImages = await ImageUpload.find();
 
-  const images_Arr = uploadedImages?.map((item) => {
-    item.images?.map((image) => {
+  // Collect uploaded images
+  uploadedImages.forEach(item => {
+    item.images.forEach(image => {
       images_Array.push(image);
-      console.log(image);
     });
   });
 
-  product = new Product({
+  // Create a new product
+  const product = new Product({
     name: req.body.name,
     ISBN: req.body.ISBN,
     description: req.body.description,
@@ -498,18 +506,14 @@ router.post(`/create`, async (req, res) => {
     location: req.body.location !== "" ? req.body.location : "All",
   });
 
-  product = await product.save();
-
-  if (!product) {
-    res.status(500).json({
-      error: err,
-      success: false,
-    });
+  // Save the product to the database
+  try {
+    const savedProduct = await product.save();
+    res.status(201).json(savedProduct);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred while creating the product.' });
   }
-
-  imagesArr = [];
-
-  res.status(201).json(product);
 });
 
 router.get("/:id", async (req, res) => {
