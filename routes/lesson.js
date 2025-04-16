@@ -110,6 +110,37 @@ router.get(`/`, async (req, res) => {
   });
 });
 
+// Check if ISBN exists
+router.get('/checkISBN', async (req, res) => {
+  const { isbn } = req.query; // Get the ISBN from the query parameters
+
+  if (!isbn) {
+    return res.status(400).json({ message: "ISBN is required" });
+  }
+
+  try {
+    // Find the product by ISBN
+    const product = await Product.findOne({ ISBN: isbn });
+
+    if (product) {
+      // If product is found, return the product name
+      return res.status(200).json({
+        exists: true,
+        productName: product.name,
+      });
+    } else {
+      // If no product is found, return a message
+      return res.status(404).json({
+        exists: false,
+        message: "ISBN not found",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
 router.get(`/catName`, async (req, res) => {
   let lessonList = [];
 
