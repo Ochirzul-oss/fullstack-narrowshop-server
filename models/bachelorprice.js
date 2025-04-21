@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const bachelorPriceSchema = mongoose.Schema({
     year: {
-        type: Number,
+        type: String,
         required: true,
     },
     price: {
-        type: Number,
+        type: String,
         required: true,
     },
     dateCreated: {
