@@ -471,7 +471,8 @@ router.post(`/create`, async (req, res) => {
     });
   });
 
-  const lesson = new Lesson({
+  // Change const to let
+  let lesson = new Lesson({
     name: req.body.name,
     description: req.body.description,
     conMinute: req.body.conMinute,
@@ -494,8 +495,8 @@ router.post(`/create`, async (req, res) => {
   });
 
   try {
-    const savedLesson = await lesson.save();
-    res.status(201).json(savedLesson);
+    lesson = await lesson.save(); // This is now valid
+    res.status(201).json(lesson);
   } catch (err) {
     console.error(err);
     res.status(500).json({
@@ -503,19 +504,6 @@ router.post(`/create`, async (req, res) => {
       success: false,
     });
   }
-
-  lesson = await lesson.save();
-
-  if (!lesson) {
-    res.status(500).json({
-      error: err,
-      success: false,
-    });
-  }
-
-  imagesArr = [];
-
-  res.status(201).json(lesson);
 });
 
 router.get("/:id", async (req, res) => {
