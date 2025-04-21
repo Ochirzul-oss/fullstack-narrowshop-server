@@ -31,10 +31,12 @@ const searchRoutes = require('./routes/search.js');
 const bannersSchema = require('./routes/banners.js');
 const homeSideBannerSchema = require('./routes/homeSideBanner.js');
 const homeBottomBannerSchema = require('./routes/homeBottomBanner.js');
+const BachelorPrice = require('./routes/bachelorprice.js');
 
 
 app.use(`/api/lessons`, lessonRoutes);
 app.use("/api/user",userRoutes);
+app.use("/api/bachelorprice", BachelorPrice);
 app.use("/uploads",express.static("uploads"));
 app.use(`/api/category`, categoryRoutes);
 app.use(`/api/products`, productRoutes);
