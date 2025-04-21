@@ -471,7 +471,7 @@ router.post(`/create`, async (req, res) => {
     });
   });
 
-  lesson = new Lesson({
+  const lesson = new Lesson({
     name: req.body.name,
     description: req.body.description,
     conMinute: req.body.conMinute,
@@ -490,7 +490,19 @@ router.post(`/create`, async (req, res) => {
     productRam: req.body.productRam,
     size: req.body.size,
     location: req.body.location !== "" ? req.body.location : "All",
+    products: req.body.products
   });
+
+  try {
+    const savedLesson = await lesson.save();
+    res.status(201).json(savedLesson);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err,
+      success: false,
+    });
+  }
 
   lesson = await lesson.save();
 
