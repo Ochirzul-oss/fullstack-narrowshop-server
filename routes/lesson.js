@@ -471,7 +471,6 @@ router.post(`/create`, async (req, res) => {
     });
   });
 
-  // Change const to let
   let lesson = new Lesson({
     name: req.body.name,
     description: req.body.description,
@@ -495,7 +494,7 @@ router.post(`/create`, async (req, res) => {
   });
 
   try {
-    lesson = await lesson.save(); // This is now valid
+    lesson = await lesson.save(); 
     res.status(201).json(lesson);
   } catch (err) {
     console.error(err);
@@ -603,28 +602,26 @@ router.put("/:id", async (req, res) => {
       subCatName: req.body.subCatName,
       catName: req.body.catName,
       category: req.body.category,
-      numReviews: req.body.numReviews,
       productRam: req.body.productRam,
       size: req.body.size,
       location: req.body.location,
+      products: req.body.products
     },
     { new: true }
   );
 
   if (!lesson) {
-    res.status(404).json({
-      message: "the lesson can not be updated!",
+    return res.status(404).json({
+      message: "The lesson cannot be updated!",
       status: false,
     });
   }
 
-  imagesArr = [];
-
   res.status(200).json({
-    message: "the lesson is updated!",
+    message: "The lesson is updated!",
     status: true,
+    lesson, 
   });
-
 });
 
 module.exports = router;
