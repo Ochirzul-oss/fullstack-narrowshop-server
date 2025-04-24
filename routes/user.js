@@ -65,6 +65,48 @@ router.post(`/upload`, upload.array("images"), async (req, res) => {
   }
 });
 
+router.post('/create', async (req, res) => {
+  const { name, phone, email, password, isAdmin } = req.body;
+
+  try {
+    // Хэрэглэгч аль хэдийн оршин байгаа эсэхийг шалгана
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email хаягтай хэрэглэгч аль хэдийн бүртгэгдсэн байна.',
+      });
+    }
+
+    // Нууц үгийг хэшлэх
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Шинэ хэрэглэгч үүсгэх
+    const user = new User({
+      name,
+      phone,
+      email,
+      password: hashedPassword,
+      isAdmin,
+      isVerified: true, // эсвэл false, хэрэв шууд идэвхжүүлэхгүй бол
+    });
+
+    const savedUser = await user.save();
+
+    return res.status(201).json({
+      success: true,
+      message: 'Хэрэглэгч амжилттай үүсгэгдлээ.',
+      user: savedUser,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: 'Сервер дээр алдаа гарлаа.',
+    });
+  }
+});
+
 router.post(`/signup`, async (req, res) => {
   const { name, phone, email, password, isAdmin } = req.body;
 
