@@ -39,6 +39,10 @@ const lessonSchema = mongoose.Schema({
         type: String,
         default: ''
     },
+    groupen:{
+        type: String,
+        default: ''
+    },
     lessonDays: [
         {
             type: String,
