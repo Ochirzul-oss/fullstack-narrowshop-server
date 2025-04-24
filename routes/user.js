@@ -178,62 +178,6 @@ router.post(`/verifyAccount/resendOtp`, async (req, res) => {
   }
 });
 
-router.post(`/create`, async (req, res) => {
-  const { name, phone, email, password, isAdmin } = req.body;
-
-  try {
-    // Check if the user already exists
-    const existingUser  = await User.findOne({ email: email });
-    const existingUserByPh = await User.findOne({ phone: phone });
-
-    if (existingUser ) {
-      return res.status(400).json({
-        success: false,
-        message: "User  already exists with this email!",
-      });
-    }
-
-    if (existingUserByPh) {
-      return res.status(400).json({
-        success: false,
-        message: "User  already exists with this phone number!",
-      });
-    }
-
-    // Hash the password
-    const hashPassword = await bcrypt.hash(password, 10);
-
-    // Create a new user
-    const user = new User({
-      name,
-      email,
-      phone,
-      password: hashPassword,
-      isAdmin,
-      isVerified: true, // Set to true if you want to create the user as verified
-    });
-
-    // Save the user to the database
-    await user.save();
-
-    // Send success response
-    return res.status(201).json({
-      success: true,
-      message: "User  created successfully!",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        isAdmin: user.isAdmin,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Something went wrong" });
-  }
-});
-
 router.put(`/verifyAccount/emailVerify/:id`, async (req, res) => {
   const { email, otp } = req.body;
 
