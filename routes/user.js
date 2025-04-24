@@ -109,18 +109,6 @@ router.post(`/signup`, async (req, res) => {
         name,
         email,
         phone,
-        lastname,
-        regisnumber,
-        number1,
-        works,
-        job,
-        district,
-        sex,
-        education,
-        goal,
-        course,
-        street,
-        contry,
         password: hashPassword,
         isAdmin,
         otp: verifyCode,
@@ -190,6 +178,62 @@ router.post(`/verifyAccount/resendOtp`, async (req, res) => {
   }
 });
 
+router.post(`/create`, async (req, res) => {
+  const { name, phone, email, password, isAdmin } = req.body;
+
+  try {
+    // Check if the user already exists
+    const existingUser  = await User.findOne({ email: email });
+    const existingUserByPh = await User.findOne({ phone: phone });
+
+    if (existingUser ) {
+      return res.status(400).json({
+        success: false,
+        message: "User  already exists with this email!",
+      });
+    }
+
+    if (existingUserByPh) {
+      return res.status(400).json({
+        success: false,
+        message: "User  already exists with this phone number!",
+      });
+    }
+
+    // Hash the password
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user
+    const user = new User({
+      name,
+      email,
+      phone,
+      password: hashPassword,
+      isAdmin,
+      isVerified: true, // Set to true if you want to create the user as verified
+    });
+
+    // Save the user to the database
+    await user.save();
+
+    // Send success response
+    return res.status(201).json({
+      success: true,
+      message: "User  created successfully!",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        isAdmin: user.isAdmin,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Something went wrong" });
+  }
+});
+
 router.put(`/verifyAccount/emailVerify/:id`, async (req, res) => {
   const { email, otp } = req.body;
 
@@ -205,20 +249,8 @@ router.put(`/verifyAccount/emailVerify/:id`, async (req, res) => {
           name: existingUser.name,
           email: email,
           phone: existingUser.phone,
-          works: existingUser.works,
-          lastname: existingUser.lastname,
-          regisnumber: existingUser.regisnumber,
-          job: existingUser.job,
-          number1: existingUser.number1,
-          street: existingUser.street,
           password: existingUser.password,
           images: existingUser.images,
-          district: existingUser.district,
-          sex: existingUser.sex,
-          education: existingUser.education,
-          goal: existingUser.goal,
-          course: existingUser.course,
-          contry: existingUser.contry,
           isAdmin: existingUser.isAdmin,
           isVerified: existingUser.isVerified,
           otp: otp,
@@ -366,19 +398,6 @@ router.put(`/changePassword/:id`, async (req, res) => {
         name: name,
         phone: phone,
         email: email,
-        regisnumber: regisnumber,
-        job: job,
-        lastname: lastname,
-        number1: number1,
-        street: street,
-        works: works,
-        contry: contry,
-        district: district,
-        sex: sex,
-        education: education,
-        goal: goal,
-        course: course,
-
         password: newPassword,
         images: images,
       },
@@ -454,17 +473,7 @@ router.post(`/authWithGoogle`, async (req, res) => {
       const result = await User.create({
         name: name,
         phone: phone,
-        job: job,
-        lastname: lastname,
-        number1: number1,
-        street: street,
-        contry: contry,
         email: email,
-        district: district,
-        sex: sex,
-        education: education,
-        goal: goal,
-        course:course,
         password: password,
         images: images,
         isAdmin: isAdmin,
@@ -500,7 +509,7 @@ router.post(`/authWithGoogle`, async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  const { name, regisnumber, lastname, works, district, sex, education, goal, course, contry, street, number1, job, phone, email } = req.body;
+  const { name, phone, email } = req.body;
 
   const userExist = await User.findById(req.params.id);
 
@@ -515,19 +524,7 @@ router.put("/:id", async (req, res) => {
     {
       name: name,
       phone: phone,
-      lastname: lastname,
-      job: job,
-      regisnumber: regisnumber,
-      street: street,
-      number1: number1,
-      contry: contry,
-      district: district,
-      sex: sex,
-      education: education,
-      goal: goal,
-      course:course,
       email: email,
-      works: works,
       password: newPassword,
       images: imagesArr,
     },
