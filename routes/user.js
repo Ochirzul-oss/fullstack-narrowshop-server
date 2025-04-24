@@ -74,12 +74,11 @@ router.post('/create', async (req, res) => {
       return res.status(400).json({ message: 'Password is required' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    // Store the plain password (not recommended)
     const user = new User({
       name,
       email,
-      password: hashedPassword,
+      password: password, // Store the plain password
       isAdmin
     });
 
