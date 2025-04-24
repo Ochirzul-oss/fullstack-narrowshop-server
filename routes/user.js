@@ -65,38 +65,32 @@ router.post(`/upload`, upload.array("images"), async (req, res) => {
   }
 });
 
-router.post(`/create`, async (req, res) => {
-  const { name, phone, email, password, isAdmin } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: "Email and password are required" });
-  }
-
+router.post('/create', async (req, res) => {
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ success: false, message: "User already exists" });
+    console.log('Received body:', req.body);
+    const { name, email, password, isAdmin } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' });
     }
 
-    const hashPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new User({
       name,
-      phone,
       email,
-      password: hashPassword,
-      isAdmin,
-      isVerified: true,
+      password: hashedPassword,
+      isAdmin
     });
 
     await user.save();
-
-    return res.status(201).json({ success: true, message: "User created successfully", user });
+    res.status(201).json(user);
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    console.error('Error creating user:', err);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 router.post(`/signup`, async (req, res) => {
   const { name, phone, email, password, isAdmin } = req.body;
