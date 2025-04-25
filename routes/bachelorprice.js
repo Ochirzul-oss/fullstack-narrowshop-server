@@ -8,6 +8,7 @@ router.post("/create", async (req, res) => {
 
     const newBachelorPrice = new BachelorPrice({
         year,
+        description,
         price,
     });
 
@@ -44,12 +45,12 @@ router.get("/:id", async (req, res) => {
 
 // Update a BachelorPrice by ID
 router.put("/:id", async (req, res) => {
-    const { year, price } = req.body;
+    const { year, description, price } = req.body;
 
     try {
         const updatedBachelorPrice = await BachelorPrice.findByIdAndUpdate(
             req.params.id,
-            { year, price },
+            { year, description, price },
             { new: true }
         );
 
