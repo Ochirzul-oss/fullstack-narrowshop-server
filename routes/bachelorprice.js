@@ -4,7 +4,7 @@ const { BachelorPrice } = require("../models/bachelorprice");
 
 // Create a new BachelorPrice
 router.post("/create", async (req, res) => {
-    const { year, price } = req.body;
+    const { year,description, price } = req.body;
 
     const newBachelorPrice = new BachelorPrice({
         year,
