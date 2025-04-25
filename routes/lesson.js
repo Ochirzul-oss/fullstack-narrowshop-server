@@ -586,7 +586,6 @@ router.delete("/:id", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  console.log("Request Body:", req.body); // Log the request body
   const lesson = await Lesson.findByIdAndUpdate(
     req.params.id,
     {
@@ -615,7 +614,7 @@ router.put("/:id", async (req, res) => {
   );
 
   if (!lesson) {
-    return res.status(404).json({
+    res.status(404).json({
       message: "the lesson can not be updated!",
       status: false,
     });
@@ -626,8 +625,8 @@ router.put("/:id", async (req, res) => {
   res.status(200).json({
     message: "the lesson is updated!",
     status: true,
-    lesson, // Return the updated lesson
   });
+
 });
 
 module.exports = router;
