@@ -10,6 +10,7 @@ const router = express.Router();
 const multer = require("multer");
 const fs = require("fs");
 const mongoose = require("mongoose");
+const { group } = require("console");
 
 const cloudinary = require("cloudinary").v2;
 
@@ -597,6 +598,7 @@ router.put("/:id", async (req, res) => {
       lessonType: req.body.lessonType,
       lessonDays: req.body.lessonDays,
       maxiStudents: req.body.maxiStudents,
+      groupen: req.body.groupen,
       images: req.body.images,
       price: req.body.price,
       catId: req.body.catId,
