@@ -32,8 +32,13 @@ router.get("/", async (req, res) => {
 
 // Get a BachelorPrice by ID
 router.get("/:id", async (req, res) => {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ success: false, message: "Invalid ID format." });
+    }
+
     try {
-        const bachelorPrice = await BachelorPrice.findById(req.params.id);
+        const bachelorPrice = await BachelorPrice.findById(id);
         if (!bachelorPrice) {
             return res.status(404).json({ message: "BachelorPrice not found." });
         }
@@ -45,11 +50,16 @@ router.get("/:id", async (req, res) => {
 
 // Update a BachelorPrice by ID
 router.put("/:id", async (req, res) => {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ success: false, message: "Invalid ID format." });
+    }
+
     const { year, description, price } = req.body;
 
     try {
         const updatedBachelorPrice = await BachelorPrice.findByIdAndUpdate(
-            req.params.id,
+            id,
             { year, description, price },
             { new: true }
         );
@@ -66,8 +76,13 @@ router.put("/:id", async (req, res) => {
 
 // Delete a BachelorPrice by ID
 router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ success: false, message: "Invalid ID format." });
+    }
+
     try {
-        const deletedBachelorPrice = await BachelorPrice.findByIdAndDelete(req.params.id);
+        const deletedBachelorPrice = await BachelorPrice.findByIdAndDelete(id);
         if (!deletedBachelorPrice) {
             return res.status(404).json({ message: "BachelorPrice not found." });
         }
@@ -76,5 +91,3 @@ router.delete("/:id", async (req, res) => {
         return res.status(500).json({ success: false, error: error.message });
     }
 });
-
-module.exports = router;
