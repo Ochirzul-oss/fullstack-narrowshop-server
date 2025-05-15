@@ -71,7 +71,7 @@ router.post("/create", async (req, res) => {
       images,
       teachers,
       location,
-    } = req.body; // Destructure all required fields
+    } = req.body;
 
     const branch = new Branch({
       name,

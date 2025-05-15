@@ -20,6 +20,7 @@ app.use(express.json());
 
 //Routes
 const lessonRoutes = require(`./routes/lesson.js`);
+const calendar = require(`./routes/calendar.js`)
 const userRoutes = require('./routes/user.js');
 const teacherRoutes = require('./routes/teacher.js');
 const branchRoutes = require('./routes/branch.js');
@@ -62,7 +63,7 @@ app.use(`/api/search`, searchRoutes);
 app.use(`/api/banners`, bannersSchema);
 app.use(`/api/homeSideBanners`, homeSideBannerSchema);
 app.use(`/api/homeBottomBanners`, homeBottomBannerSchema);
-
+app.use(`/api/calendar`, calendar);
 
 
 // Database Connection
